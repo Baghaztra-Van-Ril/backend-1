@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import os from "os";
+import passport from "./middlewares/passport.js";
 import router from "./routes/index.routes.js";
 import { handlerAnyError } from "./errors/handle_error.js";
 
@@ -20,6 +21,8 @@ app.use(
     })
 );
 
+app.use(passport.initialize());
+
 app.use("/api", router);
 
 app.use((err, req, res, next) => {
@@ -29,7 +32,6 @@ app.use((err, req, res, next) => {
 function getNetworkAddresses() {
     const addrs = [];
     const ifaces = os.networkInterfaces();
-
     for (const name of Object.keys(ifaces)) {
         for (const iface of ifaces[name] || []) {
             if (iface.family === "IPv4" && !iface.internal) {
@@ -37,7 +39,6 @@ function getNetworkAddresses() {
             }
         }
     }
-
     return addrs;
 }
 
