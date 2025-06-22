@@ -3,7 +3,8 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import os from "os";
-import router from "./routes/index.js";
+import router from "./routes/index.routes.js";
+import { handlerAnyError } from "./errors/handle_error.js";
 
 dotenv.config();
 
@@ -20,6 +21,10 @@ app.use(
 );
 
 app.use("/api", router);
+
+app.use((err, req, res, next) => {
+    handlerAnyError(err, res);
+});
 
 function getNetworkAddresses() {
     const addrs = [];
