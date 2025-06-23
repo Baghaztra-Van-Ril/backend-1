@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
 
 router.use("/users", userRouter);
 router.use("/auth", authRouter);
-router.use("/payment", paymentRouter);
-router.use("/transaction", transactionRouter);
+router.use("/payments", paymentRouter);
+router.use("/transactions", transactionRouter);
 
 export default router;
