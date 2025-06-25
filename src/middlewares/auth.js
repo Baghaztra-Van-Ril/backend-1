@@ -1,16 +1,13 @@
-import jwt from "jsonwebtoken";
 import redis from "../config/redis.js";
 import { AppError } from "../errors/handle_error.js";
 import { verifyToken } from "../utils/jwt.js";
+import { extractToken } from "../utils/auth.js";
 
 export async function authenticate(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const token = extractToken(req);
+    if (!token) {
         return next(new AppError("Unauthorized: No token provided", 401));
     }
-
-    const token = authHeader.split(" ")[1];
-
     try {
         const isBlacklisted = await redis.get(`bl_${token}`);
         if (isBlacklisted) {

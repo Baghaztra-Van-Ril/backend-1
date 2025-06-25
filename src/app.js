@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import os from "os";
+import cookieParser from "cookie-parser";
 import passport from "./middlewares/passport.js";
 import router from "./routes/index.routes.js";
 import { handlerAnyError } from "./errors/handle_error.js";
@@ -12,6 +13,7 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT) || 2002;
 
+app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(
