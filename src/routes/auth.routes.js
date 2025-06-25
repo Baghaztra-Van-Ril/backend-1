@@ -17,6 +17,7 @@ authRouter.post("/logout", authenticate, logoutController);
 
 authRouter.get(
     "/google",
+    rateLimiter,
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
