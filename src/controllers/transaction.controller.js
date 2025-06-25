@@ -6,6 +6,8 @@ import {
     getTransactionByIdService,
     deleteTransactionsService,
 } from "../services/transaction.service.js";
+import { AppError } from "../errors/handle_error.js";
+
 
 export async function getAllTransactionController(req, res, next) {
     try {
@@ -37,7 +39,7 @@ export async function getTransactionByIdController(req, res, next) {
         const data = await getTransactionByIdService(Number(id));
 
         if (role !== "ADMIN" && data.userId !== userId) {
-            return next(new AppError("Access denied", 403));
+            return next(new AppError("Forbidden: Access denied", 403));
         }
 
         res.json({ success: true, data });

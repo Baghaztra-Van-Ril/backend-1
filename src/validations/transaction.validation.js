@@ -1,12 +1,12 @@
 import Joi from "joi";
 
+const shipmentStatuses = ["PENDING", "SHIPPED", "DELIVERED", "FAILED"];
 const validStatuses = ["PENDING", "PAID", "FAILED"];
 
 export const updateTransactionSchema = Joi.object({
     ids: Joi.array().items(Joi.number().integer().positive()).min(1).required(),
     data: Joi.object({
-        paymentStatus: Joi.string().uppercase().valid(...validStatuses),
-        deletedAt: Joi.date().optional(),
+        shipmentStatus: Joi.string().uppercase().valid(...shipmentStatuses),
     }).min(1).required(),
 });
 
