@@ -32,7 +32,14 @@ export async function createPaymentController(req, res, next) {
 
         res.status(200).json({
             success: true,
-            snapToken: transaction.token,
+            data: {
+                snapToken: transaction.token,
+                redirect_url: transaction.redirect_url,
+                orderId,
+                quantity,
+                totalPrice,
+                product,
+            }
         });
     } catch (err) {
         next(err);
