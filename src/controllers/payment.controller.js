@@ -1,10 +1,12 @@
 import { createSnapTransaction } from "../services/payment/createSnap.service.js";
 import { handleNotification } from "../services/payment/notificationHandler.service.js";
 import prisma from "../config/prisma.js";
+import { generateRandomCode } from "../utils/generateRandomCode.js";
 
 export async function createPaymentController(req, res, next) {
     try {
-        const { orderId, productId, quantity } = req.body;
+        const orderId = await generateRandomCode();
+        const { productId, quantity } = req.body;
         const user = req.user;
 
         const product = await prisma.product.findUnique({

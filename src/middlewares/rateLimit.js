@@ -5,8 +5,8 @@ export async function rateLimiter(req, res, next) {
     try {
         const ip = req.ip;
         const key = `rl_${ip}`;
-        const limit = 1000;
-        const windowInSeconds = 900; // 15 minutes
+        const limit = 100;
+        const windowInSeconds = 60;
 
         const count = await redis.incr(key);
         if (count === 1) {
