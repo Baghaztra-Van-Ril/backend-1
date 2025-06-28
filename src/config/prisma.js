@@ -1,11 +1,33 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
+import dotenv from "dotenv";
 
-const globalForPrisma = globalThis;
+dotenv.config();
 
-const prisma = globalForPrisma.prisma ?? new PrismaClient();
+const globalForPrisma = globalThis
 
-if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = prisma;
+const prismaMaster =
+    globalForPrisma.prismaMaster ??
+    new PrismaClient({
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL,
+            },
+        },
+    })
+
+const prismaSlave =
+    globalForPrisma.prismaSlave ??
+    new PrismaClient({
+        datasources: {
+            db: {
+                url: process.env.REPLICA_DATABASE_URL,
+            },
+        },
+    })
+
+if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prismaMaster = prismaMaster
+    globalForPrisma.prismaSlave = prismaSlave
 }
 
-export default prisma;
+export { prismaMaster, prismaSlave }

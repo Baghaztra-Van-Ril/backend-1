@@ -1,5 +1,5 @@
 import midtransClient from "midtrans-client";
-import prisma from "../../config/prisma.js";
+import { prismaMaster, prismaSlave } from "../../config/prisma.js";
 import { AppError } from "../../errors/handle_error.js";
 
 const core = new midtransClient.CoreApi({
@@ -19,14 +19,14 @@ export async function handleNotification(notification) {
         paymentStatus = "FAILED";
     }
 
-    const transaction = await prisma.transaction.findUnique({
+    const transaction = await prismaSlave.transaction.findUnique({
         where: { orderId: order_id },
     });
 
     if (!transaction) throw new AppError("Transaction not found", 404);
     if (transaction.paymentStatus === paymentStatus) return;
 
-    await prisma.transaction.update({
+    await prismaMaster.transaction.update({
         where: { orderId: order_id },
         data: {
             paymentStatus,
@@ -35,7 +35,7 @@ export async function handleNotification(notification) {
     });
 
     if (paymentStatus === "PAID") {
-        await prisma.product.update({
+        await prismaMaster.product.update({
             where: { id: transaction.productId },
             data: {
                 stock: { decrement: transaction.quantity },
