@@ -1,4 +1,4 @@
-import prisma from "../config/prisma.js";
+import { prismaMaster, prismaSlave } from "../config/prisma.js";
 import { AppError } from "../errors/handle_error.js";
 import bcrypt from "bcryptjs";
 
@@ -6,7 +6,7 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
 
 export async function getAllUserService() {
     try {
-        return await prisma.user.findMany({
+        return await prismaSlave.user.findMany({
             where: { deletedAt: null },
             select: {
                 id: true,
@@ -26,7 +26,7 @@ export async function getAllUserService() {
 
 export async function getUserByIdService(id) {
     try {
-        const user = await prisma.user.findUnique({
+        const user = await prismaSlave.user.findUnique({
             where: { id },
             select: {
                 id: true,
@@ -52,7 +52,7 @@ export async function getUserByIdService(id) {
 
 export async function getUserByEmailService(email) {
     try {
-        const user = await prisma.user.findUnique({
+        const user = await prismaSlave.user.findUnique({
             where: { email },
         });
 
@@ -69,7 +69,7 @@ export async function getUserByEmailService(email) {
 
 export async function createUserService(userData) {
     try {
-        const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
+        const existingUser = await prismaSlave.user.findUnique({ where: { email: userData.email } });
         if (existingUser) {
             throw new AppError("User already exists", 409);
         }
@@ -80,11 +80,11 @@ export async function createUserService(userData) {
             ? await bcrypt.hash(password, saltRounds)
             : null;
 
-        const user = await prisma.user.create({
+        const user = await prismaMaster.user.create({
             data: {
                 name,
                 email,
-                role,
+                role: role || "ADMIN",
                 googleId,
                 password: hashedPassword,
             },
@@ -114,7 +114,7 @@ export async function updateUserService(id, userData) {
 
         dataToUpdate.updatedAt = new Date();
 
-        const user = await prisma.user.update({
+        const user = await prismaMaster.user.update({
             where: { id },
             data: dataToUpdate,
             select: {
@@ -141,7 +141,7 @@ export async function updateUserService(id, userData) {
 
 export async function deleteUserService(id) {
     try {
-        const user = await prisma.user.update({
+        const user = await prismaMaster.user.update({
             where: { id },
             data: {
                 deletedAt: new Date(),

@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import prisma from "../config/prisma.js";
+import { prismaMaster } from "../config/prisma.js";
 
 passport.use(
     new GoogleStrategy(
@@ -11,7 +11,7 @@ passport.use(
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
-                const user = await prisma.user.upsert({
+                const user = await prismaMaster.user.upsert({
                     where: { googleId: profile.id },
                     update: {},
                     create: {

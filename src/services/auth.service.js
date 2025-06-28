@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 import { AppError } from "../errors/handle_error.js";
-import prisma from "../config/prisma.js";
+import { prismaSlave } from "../config/prisma.js";
 import { generateToken } from "../utils/jwt.js";
 
 export async function loginAdminService(email, password) {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prismaSlave.user.findUnique({ where: { email } });
 
     if (!user || user.role !== "ADMIN") {
         throw new AppError("Unauthorized", 401);

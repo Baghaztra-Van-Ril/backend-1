@@ -1,6 +1,6 @@
 import { createSnapTransaction } from "../services/payment/createSnap.service.js";
 import { handleNotification } from "../services/payment/notificationHandler.service.js";
-import prisma from "../config/prisma.js";
+import { prismaSlave } from "../config/prisma.js";
 import { generateRandomCode } from "../utils/generateRandomCode.js";
 
 export async function createPaymentController(req, res, next) {
@@ -9,7 +9,7 @@ export async function createPaymentController(req, res, next) {
         const { productId, quantity } = req.body;
         const user = req.user;
 
-        const product = await prisma.product.findUnique({
+        const product = await prismaSlave.product.findUnique({
             where: { id: Number(productId) },
         });
 

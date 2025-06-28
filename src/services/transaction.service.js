@@ -1,10 +1,10 @@
-import prisma from "../config/prisma.js";
+import { prismaMaster, prismaSlave } from "../config/prisma.js";
 import { AppError } from "../errors/handle_error.js";
 import { sanitizeUserFromTransactions } from "../utils/sanitize.password.js";
 
 export async function getAllTransactionService({ status, userId } = {}) {
     try {
-        const transactions = await prisma.transaction.findMany({
+        const transactions = await prismaSlave.transaction.findMany({
             where: {
                 ...(status && { paymentStatus: status }),
                 ...(userId && { userId }),
@@ -25,7 +25,7 @@ export async function getAllTransactionService({ status, userId } = {}) {
 
 export async function updateTransactionService(ids, data) {
     try {
-        const result = await prisma.transaction.updateMany({
+        const result = await prismaMaster.transaction.updateMany({
             where: {
                 id: { in: ids },
                 deletedAt: null,
@@ -45,7 +45,7 @@ export async function updateTransactionService(ids, data) {
 
 export async function allTransactionsService() {
     try {
-        const transactions = await prisma.transaction.findMany({
+        const transactions = await prismaSlave.transaction.findMany({
             where: { deletedAt: null },
             include: {
                 user: true,
@@ -62,7 +62,7 @@ export async function allTransactionsService() {
 
 export async function getTransactionService(userId) {
     try {
-        return await prisma.transaction.findMany({
+        return await prismaSlave.transaction.findMany({
             where: {
                 userId,
                 deletedAt: null,
@@ -79,7 +79,7 @@ export async function getTransactionService(userId) {
 
 export async function getTransactionByIdService(transactionId) {
     try {
-        const transaction = await prisma.transaction.findUnique({
+        const transaction = await prismaSlave.transaction.findUnique({
             where: { id: transactionId },
             include: {
                 user: true,
@@ -107,7 +107,7 @@ export async function deleteTransactionsService({ userId, ids = [] }) {
             ...(ids.length > 0 && { id: { in: ids } }),
         };
 
-        const result = await prisma.transaction.updateMany({
+        const result = await prismaMaster.transaction.updateMany({
             where: whereClause,
             data: { deletedAt: new Date() },
         });
