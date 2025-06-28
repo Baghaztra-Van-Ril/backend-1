@@ -5,3 +5,4 @@ node_modules
 /generated/prisma
 note.md
 /src/test.js
+/prisma/seed.js
