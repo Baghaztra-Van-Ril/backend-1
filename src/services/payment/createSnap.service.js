@@ -1,20 +1,44 @@
-import snap from "../../config/midtrans.js";
+import { snap } from "../../config/midtrans.js";
 import { publishToQueue } from "../../queues/publisher.js";
 import { buildMidtransParams } from "../../helpers/midtransParamsBuilder.js";
 
-export async function createSnapTransaction({ orderId, product, quantity, totalPrice, user }) {
-    const params = buildMidtransParams({ orderId, product, quantity, totalPrice, user });
-    const transaction = await snap.createTransaction(params);
+export async function createSnapTransaction({
+    orderId,
+    product,
+    price,
+    quantity,
+    promoAmount,
+    finalAmount,
+    user,
+}) {
+    try {
+        const params = buildMidtransParams({
+            orderId,
+            product,
+            quantity,
+            price,
+            finalAmount,
+            user,
+        });
 
-    await publishToQueue("payment_log", {
-        orderId,
-        userId: user.id,
-        productId: product.id,
-        amount: totalPrice,
-        quantity,
-        status: "PENDING",
-        snapToken: transaction.token,
-    });
+        const transaction = await snap.createTransaction(params);
 
-    return transaction;
+        await publishToQueue("payment_log", {
+            orderId,
+            userId: user.id,
+            productId: product.id,
+            promoId: product.promoId || null,
+            price,
+            quantity,
+            promoAmount,
+            finalAmount,
+            status: "PENDING",
+            snapToken: transaction.token,
+        });
+
+        return transaction;
+    } catch (err) {
+        console.error("[❌ createSnapTransaction error]:", err);
+        throw new AppError("Failed to create Midtrans transaction", 500);
+    }
 }

@@ -53,9 +53,16 @@ model Transaction {
   orderId        String    @unique
   userId         Int
   productId      Int
-  totalPrice     Int
   quantity       Int
+  price          Int
+  totalPrice     Int
+  promoId        Int?
+  promoAmount    Int?
+  finalAmount    Int
   paymentStatus  String
+  paymentMethod  String
+  paymentRef     String?
+  snapToken      String?
   shipmentStatus String
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -63,6 +70,7 @@ model Transaction {
 
   user    User    @relation(fields: [userId], references: [id])
   product Product @relation(fields: [productId], references: [id])
+  promo   Promo?  @relation(fields: [promoId], references: [id])
 }
 
 model Promo {
@@ -74,7 +82,8 @@ model Promo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Transaction Transaction[]
 }
 
 model Favorite {
