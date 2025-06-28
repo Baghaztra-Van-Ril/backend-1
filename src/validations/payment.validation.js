@@ -11,4 +11,8 @@ export const createPaymentSchema = Joi.object({
         "number.base": "quantity must be a number",
         "number.positive": "quantity must be a positive number",
     }),
+    promoId: Joi.number().integer().positive().optional().messages({
+        "number.base": "promoId must be a number",
+        "number.positive": "promoId must be a positive number",
+    }),
 });

@@ -1,14 +1,14 @@
-export function buildMidtransParams({ orderId, product, quantity, totalPrice, user }) {
+export function buildMidtransParams({ orderId, product, quantity, price, finalAmount, user }) {
     return {
         transaction_details: {
             order_id: orderId,
-            gross_amount: totalPrice,
+            gross_amount: finalAmount,
         },
         item_details: [
             {
                 id: String(product.id),
                 name: product.name,
-                price: product.price,
+                price: price,
                 quantity: +quantity,
             },
         ],
