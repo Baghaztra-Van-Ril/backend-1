@@ -11,7 +11,7 @@ import { handlerAnyError } from "./errors/handle_error.js";
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 2002;
+const PORT = Number(process.env.PORT) || 3111;
 
 app.use(cookieParser());
 app.use(morgan("dev"));

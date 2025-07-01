@@ -2,6 +2,7 @@ import { prismaSlave } from "../../config/prisma.js";
 import { createSnapTransaction } from "./createSnap.service.js";
 import { generateRandomCode } from "../../utils/generateRandomCode.js";
 import { AppError } from "../../errors/handle_error.js";
+import { calculateFinalPrice } from "../../helpers/calculateFinalPrice.js";
 
 export async function generatePaymentDataAndCreateSnap(body, user) {
     const { productId, quantity, promoId } = body;
@@ -14,19 +15,28 @@ export async function generatePaymentDataAndCreateSnap(body, user) {
 
     let promo = null;
     if (promoId) {
-        promo = await prismaSlave.promo.findUnique({
-            where: { id: Number(promoId) },
+        promo = await prismaSlave.promo.findFirst({
+            where: {
+                id: Number(promoId),
+                isActive: true,
+            },
         });
+        if (!promo) {
+            throw new AppError("Promo not found or inactive", 404);
+        }
     }
 
     const price = product.price;
-    const totalPrice = price * quantity;
-    const promoAmount = promo ? Math.floor(totalPrice * promo.discount) : 0;
-    const finalAmount = totalPrice - promoAmount;
+    const { totalPrice, promoAmount, finalAmount } = calculateFinalPrice(
+        price,
+        quantity,
+        promo?.discount ?? 0
+    );
 
     const transaction = await createSnapTransaction({
         orderId,
         product,
+        promoId: promo?.id ?? null,
         price,
         promoId,
         quantity,
