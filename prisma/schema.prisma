@@ -41,6 +41,7 @@ model Product {
   size         Int
   stock        Int           @default(0)
   visitCount   Int           @default(0)
+  isDeleted    Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   transactions Transaction[]

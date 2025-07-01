@@ -5,6 +5,7 @@ import { buildMidtransParams } from "../../helpers/midtransParamsBuilder.js";
 export async function createSnapTransaction({
     orderId,
     product,
+    promoId,
     price,
     quantity,
     promoAmount,
@@ -15,8 +16,10 @@ export async function createSnapTransaction({
         const params = buildMidtransParams({
             orderId,
             product,
+            promoId,
             quantity,
             price,
+            promoAmount,
             finalAmount,
             user,
         });
@@ -27,7 +30,7 @@ export async function createSnapTransaction({
             orderId,
             userId: user.id,
             productId: product.id,
-            promoId: product.promoId || null,
+            promoId,
             price,
             quantity,
             promoAmount,

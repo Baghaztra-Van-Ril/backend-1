@@ -1,10 +1,21 @@
 import { prismaMaster } from "../../config/prisma.js";
 import { core } from "../../config/midtrans.js";
+import { publishToQueue } from "../../queues/publisher.js";
 
 export async function handleNotification(notification) {
     try {
         const statusResponse = await core.transaction.notification(notification);
-        const { transaction_status, order_id, transaction_id } = statusResponse;
+        const {
+            transaction_status,
+            order_id,
+            transaction_id,
+            payment_type,
+        } = statusResponse;
+
+        if (!order_id || !transaction_status || !payment_type) {
+            console.warn("[Midtrans] Notifikasi tidak valid, tidak dikirim ke queue.");
+            return;
+        }
 
         let paymentStatus = "PENDING";
         if (["settlement", "capture"].includes(transaction_status)) {
@@ -13,35 +24,15 @@ export async function handleNotification(notification) {
             paymentStatus = "FAILED";
         }
 
-        const transaction = await prismaMaster.transaction.findUnique({
-            where: { orderId: order_id },
+        await publishToQueue("payment_status_update", {
+            orderId: order_id,
+            transactionId: transaction_id,
+            paymentType: payment_type,
+            paymentStatus,
+            rawStatus: transaction_status,
         });
 
-        if (!transaction) {
-            console.error(`[Midtrans] Transaction not found: ${order_id}`);
-            return;
-        }
-
-        if (transaction.paymentStatus === paymentStatus) return;
-
-        await prismaMaster.transaction.update({
-            where: { orderId: order_id },
-            data: {
-                paymentMethod: statusResponse.payment_type,
-                paymentStatus,
-                paymentRef: transaction_id,
-                updatedAt: new Date(),
-            },
-        });
-
-        if (transaction.paymentStatus !== "PAID" && paymentStatus === "PAID") {
-            await prismaMaster.product.update({
-                where: { id: transaction.productId },
-                data: {
-                    stock: { decrement: transaction.quantity },
-                },
-            });
-        }
+        console.log(`[Midtrans] Notifikasi diproses dan dikirim ke queue: ${order_id}`);
     } catch (error) {
         console.error(`[Midtrans Notification Error]`, error);
         throw error;
