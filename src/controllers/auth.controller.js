@@ -5,6 +5,12 @@ import { generateToken } from "../utils/jwt.js";
 import { extractToken } from "../utils/auth.js";
 
 export const meController = (req, res) => {
+    res.set({
+        'Cache-Control': 'no-store',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    })
+
     res.json(req.user);
 };
 
