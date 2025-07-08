@@ -18,8 +18,14 @@ export const googleCallbackController = (req, res) => {
     });
 
     res.cookie("token", token, cookieOptions);
-    res.redirect(`${process.env.FRONTEND_URL}/home`);
+
+    const redirectPath = decodeURIComponent(req.query.state || "/home");
+
+    const safePath = redirectPath.startsWith("/") ? redirectPath : "/home";
+    res.redirect(`${process.env.FRONTEND_URL}${safePath}`);
 };
+
+
 
 export async function loginAdminController(req, res, next) {
     try {

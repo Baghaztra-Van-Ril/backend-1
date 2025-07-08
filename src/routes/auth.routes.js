@@ -18,11 +18,15 @@ authRouter.post("/logout", authenticate, logoutController);
 
 authRouter.get("/me", authenticate, meController);
 
-authRouter.get(
-    "/google",
-    rateLimiter,
-    passport.authenticate("google", { scope: ["profile", "email"] })
-);
+authRouter.get("/google", rateLimiter, (req, res, next) => {
+    const redirect = req.query.redirect || "/home";
+    const authenticator = passport.authenticate("google", {
+        scope: ["profile", "email"],
+        session: false,
+        state: encodeURIComponent(redirect),
+    });
+    authenticator(req, res, next);
+});
 
 authRouter.get(
     "/google/callback",
