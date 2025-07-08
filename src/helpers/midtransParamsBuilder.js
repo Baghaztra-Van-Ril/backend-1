@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+
 export function buildMidtransParams({
     orderId,
     product,
@@ -38,5 +42,8 @@ export function buildMidtransParams({
             email: user.email,
             first_name: user.name || "Customer",
         },
+        callbacks: {
+            finish: `${process.env.FRONTEND_URL}/history`,
+        }
     };
 }
