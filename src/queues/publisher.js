@@ -18,5 +18,4 @@ export async function publishToQueue(queue, data) {
         persistent: true,
     });
 
-    setTimeout(() => connection.close(), 100);
 }
