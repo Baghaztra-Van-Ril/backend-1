@@ -29,9 +29,18 @@ authRouter.get("/google", rateLimiter, (req, res, next) => {
 });
 
 authRouter.get(
-    "/google/callback",
-    passport.authenticate("google", { session: false, failureRedirect: "/login" }),
-    googleCallbackController
+  "/google/callback",
+  (req, res, next) => {
+    next();
+  },
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/login",
+  }),
+  (req, res, next) => {
+    next();
+  },
+  googleCallbackController
 );
 
 export default authRouter;
